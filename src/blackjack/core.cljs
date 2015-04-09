@@ -9,17 +9,20 @@
 
 ;; Actions
 
-(defn calc-winner []
+(defn won? []
   (let [now (:dice @app-state)
         then (:previous_dice @app-state)
         bet (:bet @app-state)]
-    (if (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))
-      (swap! app-state assoc :winner "You")
-      (swap! app-state assoc :winner "Me")
-      )
-    ))
+    (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))))
 
-(defn roll-dice [] 
+(defn calc-winner []
+    (if (won?)
+      ((swap! app-state assoc :winner "You") 
+       (swap! app-state assoc :points (+ (:points @app-state) 10)))
+      ((swap! app-state assoc :winner "Me")
+       (swap! app-state assoc :points (- (:points @app-state) 10)))))
+
+(defn roll-dice []
   (let [new_number (+ (rand-int 6) 1)]
     (swap! app-state assoc :previous_dice (:dice @app-state)) ; can we make two swaps atomic?
     (swap! app-state assoc :dice new_number)
