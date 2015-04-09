@@ -52,31 +52,41 @@
 
 ;; DOMAIN
 
-(defn dice [] 
-  (let [this (r/current-component)
-        props (r/props this)
-        number (:number props)]
-  [:div.dice 
-   [:image { :src (str "images/die" number ".svg") :style { :width "100px" } :alt number }]]))
+(def dice-defaults { :width "100px"
+                     :tag   :div })
+
+(defn dice []
+  (let [this   (r/current-component)
+        props  (merge dice-defaults (r/props this))
+        number (:number props)
+        tag    (:tag    props)
+        width  (:width  props)]
+
+  [tag [:image { :src (str "images/die" number ".svg") :style { :width width } :alt number }]]))
+
+(defn bet []
+  (let [bet       (:bet           @app-state)
+        dice_then (:previous_dice @app-state)]
+
+  [:div.bet (if (not (nil? bet))
+    [:div (str "Bet: " bet " than ")
+     [dice { :tag :span :width "20px" :number dice_then }]])]))
 
 (defn player [] (let
-                 [name (:name @app-state)
-                  points (:points @app-state)
-                  winner (:winner @app-state)
-                  bet (:bet @app-state)
-                  dice_then (:previous_dice @app-state)
-                  dice_now (:dice @app-state)]
+                  [name      (:name @app-state)
+                   points    (:points @app-state)
+                   winner    (:winner @app-state)
+                   dice_then (:previous_dice @app-state)
+                   dice_now  (:dice @app-state)]
 
                   [:div.player
                    [:div.name (str "Name: " name)]
                    [:div.points (str "Points: " points)]
-                   [:div.bet (str "Bet: " (if (not (nil? bet)) (clojure.string/capitalize bet)))]
+                   [bet]
                    [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
-                   [dice { :number dice_then }]
                    [dice { :number dice_now }]
                    [button {:label "Higher" :on-click #(bet-higher)}]
-                   [button {:label "Lower" :on-click #(bet-lower)}]
-                   ]))
+                   [button {:label "Lower" :on-click #(bet-lower)}]]))
 
 ;; PAGES
 
