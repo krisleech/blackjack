@@ -5,7 +5,7 @@
 (enable-console-print!)
 
 ;; initial app state
-(defonce app-state (atom { :name "" :points 1000 }))
+(defonce app-state (atom { :name "" :points 1000 :dice nil}))
 
 ;; components
 
@@ -19,7 +19,7 @@
 ;; DOMAIN
 
 (defn dice [] 
-  [:div.dice "Dice"])
+  [:div.dice (:dice @app-state)])
 
 (defn player [] (let
                  [name (:name @app-state)
@@ -29,10 +29,21 @@
                    [:div.name (str "Name: " name)]
                    [:div.points (str "Points: " points)]
                    [dice]
-                   [button {:label "Roll"}]]))
+                   [button {:label "Higher"}]
+                   [button {:label "Lower"}]
+                   ]))
 
 (defn home-page [] [:div [player]])
 
+;; Actions
+
+(defn roll-dice [] (swap! app-state assoc :dice 4))
+
 
 ;; initialize app
-(r/render [home-page] (js/document.getElementById "app"))
+(defn init! [] (
+  (roll-dice)
+  (r/render [home-page] (js/document.getElementById "app"))
+                ))
+
+(init!)
