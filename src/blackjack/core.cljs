@@ -7,6 +7,10 @@
 ;; initial app state
 (defonce app-state (r/atom { :name "" :points 1000 :previous_dice nil :dice nil :bet nil :winner nil }))
 
+;; TODO
+;; calc-winner does not account for same number being rolled
+;; initial dice roll calcs a winner without a bet
+
 ;; Actions
 
 (defn won? []
@@ -20,21 +24,24 @@
       ((swap! app-state assoc :winner "You") 
        (swap! app-state assoc :points (+ (:points @app-state) 10)))
       ((swap! app-state assoc :winner "Me")
-       (swap! app-state assoc :points (- (:points @app-state) 10)))))
+      (swap! app-state assoc :points (- (:points @app-state) 10)))
+      ))
 
 (defn roll-dice []
   (let [new_number (+ (rand-int 6) 1)]
     (swap! app-state assoc :previous_dice (:dice @app-state)) ; can we make two swaps atomic?
     (swap! app-state assoc :dice new_number)
-    (calc-winner)))
+    ))
 
 (defn bet-higher [] 
   (swap! app-state assoc :bet "higher")
-  (roll-dice))
+  (roll-dice)
+  (calc-winner))
 
 (defn bet-lower []
   (swap! app-state assoc :bet "lower")
-  (roll-dice))
+  (roll-dice)
+  (calc-winner))
 
 ;; components
 
@@ -51,7 +58,8 @@
 
 (defn dice [] 
   (let [number (:dice @app-state)]
-  [:div.dice number]))
+  [:div.dice 
+   [:image { :src (str "images/die" number ".svg") :style { :width "100px" } :alt number }]]))
 
 (defn player [] (let
                  [name (:name @app-state)
@@ -62,7 +70,7 @@
                   [:div.player
                    [:div.name (str "Name: " name)]
                    [:div.points (str "Points: " points)]
-                   [:div.bet (str "Bet " bet)]
+                   [:div.bet (str "Bet: " (clojure.string/capitalize bet))]
                    [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                    [dice]
                    [button {:label "Higher" :on-click #(bet-higher)}]
