@@ -5,21 +5,30 @@
 (enable-console-print!)
 
 ;; initial app state
-(defonce app-state (atom { :name "" :points 1000 :dice nil}))
+(defonce app-state (r/atom { :name "" :points 1000 :dice nil}))
+
+;; Actions
+
+(defn roll-dice [] 
+  (let [new_number (+ (rand-int 6) 1)]
+    (swap! app-state assoc :dice new_number)))
 
 ;; components
 
 ;; GENERIC
 
+(def button-defaults { :class 'btn' })
+
 (defn button [] 
   (let [this (r/current-component)
-        props (r/props this)]
-  [:button { :class "btn" } (:label props)]))
+        props (merge button-defaults (r/props this))]
+  [:button props (:label props)]))
 
 ;; DOMAIN
 
 (defn dice [] 
-  [:div.dice (:dice @app-state)])
+  (let [number (:dice @app-state)]
+  [:div.dice number]))
 
 (defn player [] (let
                  [name (:name @app-state)
@@ -29,18 +38,16 @@
                    [:div.name (str "Name: " name)]
                    [:div.points (str "Points: " points)]
                    [dice]
-                   [button {:label "Higher"}]
-                   [button {:label "Lower"}]
+                   [button {:label "Higher" :on-click #(roll-dice)}]
+                   [button {:label "Lower" :on-click #(roll-dice)}]
                    ]))
+
+;; PAGES
 
 (defn home-page [] [:div [player]])
 
-;; Actions
 
-(defn roll-dice [] (swap! app-state assoc :dice 4))
-
-
-;; initialize app
+;; APP
 (defn init! [] (
   (roll-dice)
   (r/render [home-page] (js/document.getElementById "app"))
