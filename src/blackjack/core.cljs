@@ -7,10 +7,6 @@
 ;; initial app state
 (defonce app-state (r/atom { :name "" :points 1000 :previous_dice nil :dice nil :bet nil :winner nil }))
 
-;; TODO
-;; calc-winner does not account for same number being rolled
-;; initial dice roll calcs a winner without a bet
-
 ;; Actions
 
 (defn won? []
@@ -57,7 +53,9 @@
 ;; DOMAIN
 
 (defn dice [] 
-  (let [number (:dice @app-state)]
+  (let [this (r/current-component)
+        props (r/props this)
+        number (:number props)]
   [:div.dice 
    [:image { :src (str "images/die" number ".svg") :style { :width "100px" } :alt number }]]))
 
@@ -65,14 +63,17 @@
                  [name (:name @app-state)
                   points (:points @app-state)
                   winner (:winner @app-state)
-                  bet (:bet @app-state)]
+                  bet (:bet @app-state)
+                  dice_then (:previous_dice @app-state)
+                  dice_now (:dice @app-state)]
 
                   [:div.player
                    [:div.name (str "Name: " name)]
                    [:div.points (str "Points: " points)]
-                   [:div.bet (str "Bet: " (clojure.string/capitalize bet))]
+                   [:div.bet (str "Bet: " (if (not (nil? bet)) (clojure.string/capitalize bet)))]
                    [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
-                   [dice]
+                   [dice { :number dice_then }]
+                   [dice { :number dice_now }]
                    [button {:label "Higher" :on-click #(bet-higher)}]
                    [button {:label "Lower" :on-click #(bet-lower)}]
                    ]))
