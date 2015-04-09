@@ -7,13 +7,15 @@
 ;; initial app state
 (defonce app-state (r/atom { :name "" :points 1000 :previous_dice nil :dice nil :bet nil :winner nil }))
 
-;; Actions
+;; Queries
 
 (defn won? []
   (let [now (:dice @app-state)
         then (:previous_dice @app-state)
         bet (:bet @app-state)]
     (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))))
+
+;; Actions
 
 (defn calc-winner []
     (if (won?)
@@ -26,8 +28,7 @@
 (defn roll-dice []
   (let [new_number (+ (rand-int 6) 1)]
     (swap! app-state assoc :previous_dice (:dice @app-state)) ; can we make two swaps atomic?
-    (swap! app-state assoc :dice new_number)
-    ))
+    (swap! app-state assoc :dice new_number)))
 
 (defn bet-higher [] 
   (swap! app-state assoc :bet "higher")
@@ -70,7 +71,7 @@
 
   [:div.bet (if (not (nil? bet))
     [:div (str "Bet: " bet " than ")
-     [dice { :tag :span :width "20px" :number dice_then }]])]))
+      [dice { :tag :span :width "20px" :number dice_then }]])]))
 
 (defn player [] (let
                   [name      (:name @app-state)
@@ -80,13 +81,13 @@
                    dice_now  (:dice @app-state)]
 
                   [:div.player
-                   [:div.name (str "Name: " name)]
-                   [:div.points (str "Points: " points)]
-                   [bet]
-                   [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
-                   [dice { :number dice_now }]
-                   [button {:label "Higher" :on-click #(bet-higher)}]
-                   [button {:label "Lower" :on-click #(bet-lower)}]]))
+                    [:div.name (str "Name: " name)]
+                    [:div.points (str "Points: " points)]
+                    [bet]
+                    [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
+                    [dice { :number dice_now }]
+                    [button {:label "Higher" :on-click #(bet-higher)}]
+                    [button {:label "Lower" :on-click #(bet-lower)}]]))
 
 ;; PAGES
 
