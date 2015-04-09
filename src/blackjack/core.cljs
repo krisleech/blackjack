@@ -9,6 +9,15 @@
 
 ;; components
 
+;; GENERIC
+
+(defn button [] 
+  (let [this (r/current-component)
+        props (r/props this)]
+  [:button { :class "btn" } (:label props)]))
+
+;; DOMAIN
+
 (defn dice [] 
   [:div.dice "Dice"])
 
@@ -20,7 +29,7 @@
                    [:div.name (str "Name: " name)]
                    [:div.points (str "Points: " points)]
                    [dice]
-                   [:button "Roll"]]))
+                   [button {:label "Roll"}]]))
 
 (defn home-page [] [:div [player]])
 
