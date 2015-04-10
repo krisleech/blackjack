@@ -1,6 +1,10 @@
 ;; always reload this file
 (ns ^:figwheel-always blackjack.core
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [secretary.core :as secretary :refer-macros [defroute]]
+            [goog.events :as events]
+            [goog.history.EventType :as EventType])
+  (:import goog.History))
 
 (enable-console-print!)
 
@@ -10,9 +14,9 @@
 ;; Queries
 
 (defn won? []
-  (let [now (:dice @app-state)
+  (let [now  (:dice @app-state)
         then (:previous_dice @app-state)
-        bet (:bet @app-state)]
+        bet  (:bet @app-state)]
     (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))))
 
 ;; Actions
@@ -89,15 +93,45 @@
                     [button {:label "Higher" :on-click #(bet-higher)}]
                     [button {:label "Lower" :on-click #(bet-lower)}]]))
 
+(defn header []
+  [:div.header 
+    [:a { :href "/#" } "Lobby"]
+    [:a { :href "/#high-low-game" } "High Low"]])
+
 ;; PAGES
 
-(defn home-page [] [:div [player]])
+(defn home-page [] 
+  (let
+    [points (:points @app-state)]
+  [:div
+    [:h1 "Casino"]
+    [:p (str "Points: " points)]
+    [:p "Choose a game"]
+    [:a { :href "/#high-low-game" } "High Low"]]))
+
+(defn high-low-game [] [:div [header] [player]])
+
+;; Routes
+
+; help to render an entire page
+(defn render-page [page] (r/render [page] (js/document.getElementById "app")))
+
+(defroute "/" []
+  (render-page home-page))
+
+(defroute "/high-low-game" []
+  (render-page high-low-game))
+
+;; Dispatch routes based on URL
+(let [h (History.)]
+  (goog.events/listen h EventType/NAVIGATE #(println (.-token %)))
+  (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
+  (doto h (.setEnabled true)))
 
 
 ;; APP
 (defn init! [] (
   (roll-dice)
-  (r/render [home-page] (js/document.getElementById "app"))
-                ))
+  (render-page home-page)))
 
 (init!)
