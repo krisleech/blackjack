@@ -71,13 +71,13 @@
                     [bet]
                     [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                     [dice { :number dice_now }]
-                    [ui/button {:label "Higher" :on-click #(bet-higher)}]
-                    [ui/button {:label "Lower" :on-click #(bet-lower)}]]))
+                    [:p { :class "bet-buttons" }
+                      [ui/button {:label "Higher" :on-click #(bet-higher)}]
+                      [ui/button {:label "Lower" :on-click #(bet-lower)}]]]))
 
 (defn header []
   [:div.header 
-    [:a { :href "/#" } "Lobby"]
-    [:a { :href "/#high-low-game" } "High Low"]])
+    [:a { :href "/#" } "Lobby"]])
 
 ;; PAGE
 

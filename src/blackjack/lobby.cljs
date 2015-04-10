@@ -2,13 +2,18 @@
   (:require [reagent.core :as r]
             [blackjack.debug-panel :as debug-panel]))
 
-(defn page []
+(defn header [] 
   (let
     [points (:points @blackjack.core/app-state)]
-  [:div
-    [:h1 "Casino"]
-    [:p (str "Points: " points)]
-    [:p "Choose a game"]
-    [:a { :href "/#high-low-game" } "High Low"]
-    [debug-panel/widget]]))
+    [:div { :class "container" :id "header" }
+     [:p { :class "pull-left" } [:a { :href "/#" } "CASINO"]]
+     [:p { :class "pull-right" } (str "Score: " points)]]))
 
+(defn page []
+  [:div { :id "app" }
+   [header]
+   [:div { :id "content" :class "container" }
+    [:p "Choose a game"]
+    [:ol
+     [:li [:a { :href "/#high-low-game" } "High Low"]]]]
+   [debug-panel/widget]])

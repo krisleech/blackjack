@@ -1,4 +1,11 @@
-div#debug {
-  margin-top: 200px;
+div#content {
+  min-height: 400px;
 }
+
+div#debug {
+}
+
+.bet-buttons { margin-top: 10px; }
+.bet-buttons button {
+margin-right: 5px;}
 
