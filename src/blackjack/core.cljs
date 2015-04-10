@@ -3,6 +3,7 @@
   (:require [reagent.core :as r]
             [secretary.core :as secretary :refer-macros [defroute]]
             [goog.events :as events]
+            [blackjack.ui :as ui]
             [goog.history.EventType :as EventType])
   (:import goog.History))
 
@@ -23,11 +24,12 @@
 
 (defn calc-winner []
     (if (won?)
-      ((swap! app-state assoc :winner "You") 
-       (swap! app-state assoc :points (+ (:points @app-state) 10)))
-      ((swap! app-state assoc :winner "Me")
-      (swap! app-state assoc :points (- (:points @app-state) 10)))
-      ))
+      (do 
+        (swap! app-state assoc :winner "You") 
+        (swap! app-state assoc :points (+ (:points @app-state) 10)))
+      (do 
+        (swap! app-state assoc :winner "Me")
+        (swap! app-state assoc :points (- (:points @app-state) 10)))))
 
 (defn roll-dice []
   (let [new_number (+ (rand-int 6) 1)]
@@ -45,15 +47,6 @@
   (calc-winner))
 
 ;; components
-
-;; GENERIC
-
-(def button-defaults { :class 'btn' })
-
-(defn button [] 
-  (let [this (r/current-component)
-        props (merge button-defaults (r/props this))]
-  [:button props (:label props)]))
 
 ;; DOMAIN
 
@@ -90,8 +83,8 @@
                     [bet]
                     [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                     [dice { :number dice_now }]
-                    [button {:label "Higher" :on-click #(bet-higher)}]
-                    [button {:label "Lower" :on-click #(bet-lower)}]]))
+                    [ui/button {:label "Higher" :on-click #(bet-higher)}]
+                    [ui/button {:label "Lower" :on-click #(bet-lower)}]]))
 
 (defn header []
   [:div.header 
