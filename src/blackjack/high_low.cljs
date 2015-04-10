@@ -79,6 +79,15 @@
     [:a { :href "/#" } "Lobby"]
     [:a { :href "/#high-low-game" } "High Low"]])
 
-;; PAGES
+;; PAGE
 
 (defn page [] [:div [header] [player]])
+
+;; Initalize
+
+(defn initialize [] (do 
+                      (swap! blackjack.core/app-state assoc :previous_dice nil)
+                      (swap! blackjack.core/app-state assoc :dice nil)
+                      (swap! blackjack.core/app-state assoc :bet nil)
+                      (swap! blackjack.core/app-state assoc :winner nil)
+                      (roll-dice)))

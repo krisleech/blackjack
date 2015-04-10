@@ -11,10 +11,7 @@
 (enable-console-print!)
 
 ;; initial app state
-(defonce app-state (r/atom { :name "" :points 1000 :previous_dice nil :dice nil :bet nil :winner nil }))
-
-;; Queries
-
+(defonce app-state (r/atom { :name "" :points 1000 }))
 
 ;; Routes
 
@@ -34,8 +31,7 @@
   (doto h (.setEnabled true)))
 
 ;; APP
-(defn init! [] (
-  (high-low/roll-dice) ; move to initialize fn
-  (render-page lobby/page)))
+(defn init! [] (do (high-low/initialize)
+                   (render-page lobby/page)))
 
 (init!)
