@@ -4,6 +4,7 @@
             [secretary.core :as secretary :refer-macros [defroute]]
             [goog.events :as events]
             [blackjack.ui :as ui]
+            [blackjack.lobby :as lobby]
             [goog.history.EventType :as EventType])
   (:import goog.History))
 
@@ -93,15 +94,6 @@
 
 ;; PAGES
 
-(defn home-page [] 
-  (let
-    [points (:points @app-state)]
-  [:div
-    [:h1 "Casino"]
-    [:p (str "Points: " points)]
-    [:p "Choose a game"]
-    [:a { :href "/#high-low-game" } "High Low"]]))
-
 (defn high-low-game [] [:div [header] [player]])
 
 ;; Routes
@@ -110,7 +102,7 @@
 (defn render-page [page] (r/render [page] (js/document.getElementById "app")))
 
 (defroute "/" []
-  (render-page home-page))
+  (render-page lobby/page))
 
 (defroute "/high-low-game" []
   (render-page high-low-game))
@@ -121,10 +113,9 @@
   (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
   (doto h (.setEnabled true)))
 
-
 ;; APP
 (defn init! [] (
   (roll-dice)
-  (render-page home-page)))
+  (render-page lobby/page)))
 
 (init!)
