@@ -15,7 +15,7 @@
 
 ;; Routes
 
-; help to render an entire page
+; helper to render an entire page
 (defn render-page [page] (r/render [page] (js/document.getElementById "app")))
 
 (defroute "/" []
