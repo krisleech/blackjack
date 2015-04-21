@@ -3,9 +3,9 @@
             [blackjack.ui :as ui]))
 
 (defn won? []
-  (let [now  (:dice @blackjack.core/app-state)
-        then (:previous_dice @blackjack.core/app-state)
-        bet  (:bet @blackjack.core/app-state)]
+  (let [now  (get-in @blackjack.core/app-state [:high-low :dice])
+        then (get-in @blackjack.core/app-state [:high-low :previous_dice ])
+        bet  (get-in @blackjack.core/app-state [:high-low :bet])]
     (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))))
 
 ;; Actions
@@ -13,24 +13,24 @@
 (defn calc-winner []
     (if (won?)
       (do 
-        (swap! blackjack.core/app-state assoc :winner "You") 
+        (swap! blackjack.core/app-state assoc-in [:high-low :winner] "You") 
         (swap! blackjack.core/app-state assoc :points (+ (:points @blackjack.core/app-state) 10)))
       (do 
-        (swap! blackjack.core/app-state assoc :winner "Me")
+        (swap! blackjack.core/app-state assoc-in [:high-low :winner] "Me")
         (swap! blackjack.core/app-state assoc :points (- (:points @blackjack.core/app-state) 10)))))
 
 (defn roll-dice []
   (let [new_number (+ (rand-int 6) 1)]
-    (swap! blackjack.core/app-state assoc :previous_dice (:dice @blackjack.core/app-state)) ; can we make two swaps atomic?
-    (swap! blackjack.core/app-state assoc :dice new_number)))
+    (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (get-in @blackjack.core/app-state [:high-low :dice])) ; can we make two swaps atomic?
+    (swap! blackjack.core/app-state assoc-in [:high-low :dice] new_number)))
 
 (defn bet-higher [] 
-  (swap! blackjack.core/app-state assoc :bet "higher")
+  (swap! blackjack.core/app-state assoc-in [:high-low :bet] "higher")
   (roll-dice)
   (calc-winner))
 
 (defn bet-lower []
-  (swap! blackjack.core/app-state assoc :bet "lower")
+  (swap! blackjack.core/app-state assoc-in [:high-low :bet] "lower")
   (roll-dice)
   (calc-winner))
 
@@ -51,19 +51,19 @@
   [tag [:image { :src (str "images/die" number ".svg") :style { :width width } :alt number }]]))
 
 (defn bet []
-  (let [bet       (:bet           @blackjack.core/app-state)
-        dice_then (:previous_dice @blackjack.core/app-state)]
+  (let [bet       (get-in @blackjack.core/app-state [:high-low :bet])
+        dice_then (get-in @blackjack.core/app-state [:high-low :previous_dice])]
 
   [:div.bet (if (not (nil? bet))
     [:div (str "Bet: " bet " than ")
       [dice { :tag :span :width "20px" :number dice_then }]])]))
 
 (defn player [] (let
-                  [name      (:name @blackjack.core/app-state)
+                  [name      (get-in @blackjack.core/app-state [:high-low :name])
                    points    (:points @blackjack.core/app-state)
-                   winner    (:winner @blackjack.core/app-state)
-                   dice_then (:previous_dice @blackjack.core/app-state)
-                   dice_now  (:dice @blackjack.core/app-state)]
+                   winner    (get-in @blackjack.core/app-state [:high-low :winner])
+                   dice_then (get-in @blackjack.core/app-state [:high-low :previous_dice])
+                   dice_now  (get-in @blackjack.core/app-state [:high-low :dice])]
 
                   [:div.player
                     [:div.name (str "Name: " name)]
@@ -86,8 +86,5 @@
 ;; Initalize
 
 (defn initialize [] (do 
-                      (swap! blackjack.core/app-state assoc :previous_dice nil)
-                      (swap! blackjack.core/app-state assoc :dice nil)
-                      (swap! blackjack.core/app-state assoc :bet nil)
-                      (swap! blackjack.core/app-state assoc :winner nil)
+                      (swap! blackjack.core/app-state assoc :high-low { :previous_dice nil :dice nil :bet nil :winner nil })
                       (roll-dice)))
