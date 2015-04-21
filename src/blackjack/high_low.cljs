@@ -2,10 +2,12 @@
   (:require [reagent.core :as r]
             [blackjack.ui :as ui]))
 
+(defn game-state [key] (get-in @blackjack.core/app-state [:high-low key]))
+
 (defn won? []
-  (let [now  (get-in @blackjack.core/app-state [:high-low :dice])
-        then (get-in @blackjack.core/app-state [:high-low :previous_dice ])
-        bet  (get-in @blackjack.core/app-state [:high-low :bet])]
+  (let [now  (game-state :dice)
+        then (game-state :previous_dice)
+        bet  (game-state :bet)]
     (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))))
 
 ;; Actions
@@ -21,7 +23,7 @@
 
 (defn roll-dice []
   (let [new_number (+ (rand-int 6) 1)]
-    (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (get-in @blackjack.core/app-state [:high-low :dice])) ; can we make two swaps atomic?
+    (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (game-state :dice)) ; can we make two swaps atomic?
     (swap! blackjack.core/app-state assoc-in [:high-low :dice] new_number)))
 
 (defn bet-higher [] 
@@ -51,19 +53,19 @@
   [tag [:image { :src (str "images/die" number ".svg") :style { :width width } :alt number }]]))
 
 (defn bet []
-  (let [bet       (get-in @blackjack.core/app-state [:high-low :bet])
-        dice_then (get-in @blackjack.core/app-state [:high-low :previous_dice])]
+  (let [bet       (game-state :bet)
+        dice_then (game-state :previous_dice)]
 
   [:div.bet (if (not (nil? bet))
     [:div (str "Bet: " bet " than ")
       [dice { :tag :span :width "20px" :number dice_then }]])]))
 
 (defn player [] (let
-                  [name      (get-in @blackjack.core/app-state [:high-low :name])
+                  [name      (:name @blackjack.core/app-state)
                    points    (:points @blackjack.core/app-state)
-                   winner    (get-in @blackjack.core/app-state [:high-low :winner])
-                   dice_then (get-in @blackjack.core/app-state [:high-low :previous_dice])
-                   dice_now  (get-in @blackjack.core/app-state [:high-low :dice])]
+                   winner    (game-state :winner)
+                   dice_then (game-state :previous_dice)
+                   dice_now  (game-state :dice)]
 
                   [:div.player
                     [:div.name (str "Name: " name)]
