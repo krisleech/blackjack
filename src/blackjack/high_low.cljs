@@ -13,23 +13,24 @@
 ;; Actions
 
 (defn calc-winner []
-    (if (won?)
-      (do 
-        (swap! blackjack.core/app-state assoc-in [:high-low :winner] "You") 
-        (swap! blackjack.core/app-state assoc :points (+ (:points @blackjack.core/app-state) 10)))
-      (do 
-        (swap! blackjack.core/app-state assoc-in [:high-low :winner] "Me")
-        (swap! blackjack.core/app-state assoc :points (- (:points @blackjack.core/app-state) 10)))))
+  (if (won?)
+    (do 
+      (swap! blackjack.core/app-state assoc-in [:high-low :winner] "You") 
+      (swap! blackjack.core/app-state assoc :points (+ (:points @blackjack.core/app-state) 10)))
+    (do 
+      (swap! blackjack.core/app-state assoc-in [:high-low :winner] "Me")
+      (swap! blackjack.core/app-state assoc :points (- (:points @blackjack.core/app-state) 10)))))
 
+;; Better to have an animated GIF for showing dice rolling?
 (defn roll-dice []
-  (let [new_number (+ (rand-int 6) 1)]
-    (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (game-state :dice)) ; can we make two swaps atomic?
-    (swap! blackjack.core/app-state assoc-in [:high-low :dice] new_number)))
+  (do
+    (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (game-state :dice))
+    (let [timer (js/setInterval #(swap! blackjack.core/app-state assoc-in [:high-low :dice] (+ (rand-int 6) 1)) 60)]
+      (js/setTimeout #(do (js/clearInterval timer) (calc-winner)) 1000))))
 
 (defn make-bet [choice]
   (swap! blackjack.core/app-state assoc-in [:high-low :bet] choice)
-  (roll-dice)
-  (calc-winner))
+  (roll-dice))
 
 ;; components
 
