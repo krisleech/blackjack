@@ -26,13 +26,8 @@
     (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (game-state :dice)) ; can we make two swaps atomic?
     (swap! blackjack.core/app-state assoc-in [:high-low :dice] new_number)))
 
-(defn bet-higher [] 
-  (swap! blackjack.core/app-state assoc-in [:high-low :bet] "higher")
-  (roll-dice)
-  (calc-winner))
-
-(defn bet-lower []
-  (swap! blackjack.core/app-state assoc-in [:high-low :bet] "lower")
+(defn make-bet [choice]
+  (swap! blackjack.core/app-state assoc-in [:high-low :bet] choice)
   (roll-dice)
   (calc-winner))
 
@@ -74,8 +69,8 @@
                     [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                     [dice { :number dice_now }]
                     [:p { :class "bet-buttons" }
-                      [ui/button {:label "Higher" :on-click #(bet-higher)}]
-                      [ui/button {:label "Lower" :on-click #(bet-lower)}]]]))
+                      [ui/button {:label "Higher" :on-click #(make-bet "higher")}]
+                      [ui/button {:label "Lower" :on-click #(make-bet "lower")}]]]))
 
 (defn header []
   [:div.header 
