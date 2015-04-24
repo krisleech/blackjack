@@ -3,15 +3,17 @@
             [blackjack.layout :as layout]
             [blackjack.ui :as ui]))
 
-(def game-key :high-low)
+;; State 
+(def db-key :high-low)
+(defn db-get [key] (get-in @blackjack.core/app-state [db-key key]))
+(defn db-put[key value] (swap! blackjack.core/app-state assoc-in [db-key key] value))
 
-(defn game-state [key] (get-in @blackjack.core/app-state [game-key key]))
-(defn set-game-state [key value] (swap! blackjack.core/app-state assoc-in [game-key key] value))
+;; Queries
 
 (defn won? []
-  (let [now  (game-state :dice)
-        then (game-state :previous_dice)
-        bet  (game-state :bet)]
+  (let [now  (db-get :dice)
+        then (db-get :previous_dice)
+        bet  (db-get :bet)]
     (or (and (> now then) (= bet "higher")) (and (< now then) (= bet "lower")))))
 
 ;; Actions
@@ -19,21 +21,21 @@
 (defn calc-winner []
   (if (won?)
     (do
-      (set-game-state :winner "You")
+      (db-put :winner "You")
       (swap! blackjack.core/app-state assoc :points (+ (:points @blackjack.core/app-state) 10)))
     (do
-      (set-game-state :winner "Me")
+      (db-put :winner "Me")
       (swap! blackjack.core/app-state assoc :points (- (:points @blackjack.core/app-state) 10)))))
 
 ;; Better to have an animated GIF for showing dice rolling?
 (defn roll-dice []
   (do
-    (set-game-state :previous_dice (game-state :dice))
-    (let [timer (js/setInterval #(set-game-state :dice (+ (rand-int 6) 1)) 60)]
+    (db-put :previous_dice (db-get :dice))
+    (let [timer (js/setInterval #(db-put :dice (+ (rand-int 6) 1)) 60)]
       (js/setTimeout #(do (js/clearInterval timer) (calc-winner)) 1000))))
 
 (defn make-bet [choice]
-  (set-game-state :bet choice)
+  (db-put :bet choice)
   (roll-dice))
 
 ;; components
@@ -53,17 +55,17 @@
   [tag [:image { :src (str "images/die" number ".svg") :style { :width width } :alt number }]]))
 
 (defn bet []
-  (let [bet       (game-state :bet)
-        dice_then (game-state :previous_dice)]
+  (let [bet       (db-get :bet)
+        dice_then (db-get :previous_dice)]
 
   [:div.bet (if (not (nil? bet))
     [:div (str "Bet: " bet " than ")
       [dice { :tag :span :width "20px" :number dice_then }]])]))
 
 (defn player [] (let
-                  [winner    (game-state :winner)
-                   dice_then (game-state :previous_dice)
-                   dice_now  (game-state :dice)]
+                  [winner    (db-get :winner)
+                   dice_then (db-get :previous_dice)
+                   dice_now  (db-get :dice)]
 
                   [:div.player
                     [bet]
@@ -85,5 +87,5 @@
 ;; Initalize
 
 (defn initialize [] (do 
-                      (swap! blackjack.core/app-state assoc game-key { :previous_dice nil :dice nil :bet nil :winner nil })
+                      (swap! blackjack.core/app-state assoc db-key { :previous_dice nil :dice nil :bet nil :winner nil })
                       (roll-dice)))
