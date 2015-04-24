@@ -7,5 +7,3 @@
   (let [this (r/current-component)
         props (merge button-defaults (r/props this))]
   [:button props (:label props)]))
-
-

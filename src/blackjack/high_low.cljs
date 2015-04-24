@@ -1,5 +1,6 @@
 (ns blackjack.high-low
   (:require [reagent.core :as r]
+            [blackjack.layout :as layout]
             [blackjack.ui :as ui]))
 
 (defn game-state [key] (get-in @blackjack.core/app-state [:high-low key]))
@@ -57,15 +58,11 @@
       [dice { :tag :span :width "20px" :number dice_then }]])]))
 
 (defn player [] (let
-                  [name      (:name @blackjack.core/app-state)
-                   points    (:points @blackjack.core/app-state)
-                   winner    (game-state :winner)
+                  [winner    (game-state :winner)
                    dice_then (game-state :previous_dice)
                    dice_now  (game-state :dice)]
 
                   [:div.player
-                    [:div.name (str "Name: " name)]
-                    [:div.points (str "Points: " points)]
                     [bet]
                     [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                     [dice { :number dice_now }]
@@ -79,7 +76,8 @@
 
 ;; PAGE
 
-(defn page [] [:div [header] [player]])
+(defn page []
+  [layout/page [player]])
 
 ;; Initalize
 

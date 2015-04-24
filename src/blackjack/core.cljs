@@ -26,7 +26,6 @@
 
 ;; Dispatch routes based on URL
 (let [h (History.)]
-  (goog.events/listen h EventType/NAVIGATE #(println (.-token %)))
   (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
   (doto h (.setEnabled true)))
 
