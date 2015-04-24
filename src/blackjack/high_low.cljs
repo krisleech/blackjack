@@ -3,7 +3,10 @@
             [blackjack.layout :as layout]
             [blackjack.ui :as ui]))
 
-(defn game-state [key] (get-in @blackjack.core/app-state [:high-low key]))
+(def game-key :high-low)
+
+(defn game-state [key] (get-in @blackjack.core/app-state [game-key key]))
+(defn set-game-state [key value] (swap! blackjack.core/app-state assoc-in [game-key key] value))
 
 (defn won? []
   (let [now  (game-state :dice)
@@ -15,22 +18,22 @@
 
 (defn calc-winner []
   (if (won?)
-    (do 
-      (swap! blackjack.core/app-state assoc-in [:high-low :winner] "You") 
+    (do
+      (set-game-state :winner "You")
       (swap! blackjack.core/app-state assoc :points (+ (:points @blackjack.core/app-state) 10)))
-    (do 
-      (swap! blackjack.core/app-state assoc-in [:high-low :winner] "Me")
+    (do
+      (set-game-state :winner "Me")
       (swap! blackjack.core/app-state assoc :points (- (:points @blackjack.core/app-state) 10)))))
 
 ;; Better to have an animated GIF for showing dice rolling?
 (defn roll-dice []
   (do
-    (swap! blackjack.core/app-state assoc-in [:high-low :previous_dice] (game-state :dice))
-    (let [timer (js/setInterval #(swap! blackjack.core/app-state assoc-in [:high-low :dice] (+ (rand-int 6) 1)) 60)]
+    (set-game-state :previous_dice (game-state :dice))
+    (let [timer (js/setInterval #(set-game-state :dice (+ (rand-int 6) 1)) 60)]
       (js/setTimeout #(do (js/clearInterval timer) (calc-winner)) 1000))))
 
 (defn make-bet [choice]
-  (swap! blackjack.core/app-state assoc-in [:high-low :bet] choice)
+  (set-game-state :bet choice)
   (roll-dice))
 
 ;; components
@@ -82,5 +85,5 @@
 ;; Initalize
 
 (defn initialize [] (do 
-                      (swap! blackjack.core/app-state assoc :high-low { :previous_dice nil :dice nil :bet nil :winner nil })
+                      (swap! blackjack.core/app-state assoc game-key { :previous_dice nil :dice nil :bet nil :winner nil })
                       (roll-dice)))
