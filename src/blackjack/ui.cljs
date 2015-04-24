@@ -1,7 +1,7 @@
 (ns blackjack.ui
   (:require [reagent.core :as r]))
 
-(def button-defaults { :class "btn btn-primary" })
+(def button-defaults { :disabled false :class "btn btn-primary" })
 
 (defn button []
   (let [this (r/current-component)

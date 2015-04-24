@@ -27,20 +27,23 @@
       (db-put :winner "Me")
       (swap! blackjack.core/app-state assoc :points (- (:points @blackjack.core/app-state) 10)))))
 
-;; Better to have an animated GIF for showing dice rolling?
+(defn dice-rolled []
+  (calc-winner)
+  (db-put :bet-in-progress false))
+
 (defn roll-dice []
   (do
     (db-put :previous_dice (db-get :dice))
     (let [timer (js/setInterval #(db-put :dice (+ (rand-int 6) 1)) 60)]
-      (js/setTimeout #(do (js/clearInterval timer) (calc-winner)) 1000))))
+      (js/setTimeout #(do (js/clearInterval timer)
+                          (dice-rolled)) 1000))))
 
 (defn make-bet [choice]
   (db-put :bet choice)
+  (db-put :bet-in-progress true)
   (roll-dice))
 
 ;; components
-
-;; DOMAIN
 
 (def dice-defaults { :width "100px"
                      :tag   :div })
@@ -72,8 +75,8 @@
                     [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                     [dice { :number dice_now }]
                     [:p { :class "bet-buttons" }
-                      [ui/button {:label "Higher" :on-click #(make-bet "higher")}]
-                      [ui/button {:label "Lower" :on-click #(make-bet "lower")}]]]))
+                      [ui/button {:label "Higher" :disabled (db-get :bet-in-progress) :on-click #(make-bet "higher")}]
+                      [ui/button {:label "Lower"  :disabled (db-get :bet-in-progress) :on-click #(make-bet "lower")}]]]))
 
 (defn header []
   [:div.header 
@@ -87,5 +90,5 @@
 ;; Initalize
 
 (defn initialize [] (do 
-                      (swap! blackjack.core/app-state assoc db-key { :previous_dice nil :dice nil :bet nil :winner nil })
+                      (swap! blackjack.core/app-state assoc db-key { :previous_dice nil :dice nil :bet nil :winner nil :bet-in-progress false })
                       (roll-dice)))
