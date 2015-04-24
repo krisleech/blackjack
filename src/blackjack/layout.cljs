@@ -4,16 +4,21 @@
 (defn header [] 
   (let
     [points (:points @blackjack.core/app-state)]
-    [:div { :class "container" :id "header" }
+    [:div#header.container
      [:p { :class "pull-left" } [:a { :href "/#" } "CASINO"]]
      [:p { :class "pull-right" } (str "Score: " points)]]))
 
-(defn debug-panel [] [:div#debug (str @blackjack.core/app-state)])
+(defn debug-panel [] 
+  (let [closed (r/atom false)]
+    (fn [] 
+      [:div#debug 
+       (when-not @closed [:div#app-state (str @blackjack.core/app-state)])
+       [:a {:on-click #(swap! closed not)} (if @closed "Open" "Close")]])))
 
 (defn page []
   (let [this (r/current-component)
         children (r/children this)]
-  [:div
-   [header]
-   (into [:div.container] children)
-   [debug-panel]]))
+    [:div#content
+     [header]
+     (into [:div.container] children)
+     [debug-panel]]))
