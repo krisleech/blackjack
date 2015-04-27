@@ -5,8 +5,10 @@
   (let
     [points (:points @blackjack.core/app-state)]
     [:div#header.container
-     [:p { :class "pull-left" } [:a { :href "/#" } "CASINO"]]
-     [:p { :class "pull-right" } (str "Score: " points)]]))
+     [:div { :class "pull-left" } [:a { :href "/#" } "CASINO"]]
+     [:div { :class "pull-right" }
+      [:div (str "Score: " points)]
+      [:div#points-sparkline]]]))
 
 (defn debug-panel [] 
   (let [closed (r/atom false)]

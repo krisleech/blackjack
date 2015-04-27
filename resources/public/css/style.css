@@ -9,3 +9,9 @@ div#debug {
 .bet-buttons button {
 margin-right: 5px;}
 
+
+.sparkline {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+}
