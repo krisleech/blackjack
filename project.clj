@@ -9,6 +9,7 @@
                  [figwheel "0.2.5-SNAPSHOT"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [reagent "0.5.0"]
+                 [re-frame "0.2.0"]
                  [secretary "1.2.3"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]

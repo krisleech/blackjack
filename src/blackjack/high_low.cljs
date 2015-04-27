@@ -1,5 +1,7 @@
 (ns blackjack.high-low
+  (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as r]
+            [re-frame.core :as reframe]
             [blackjack.layout :as layout]
             [blackjack.ui :as ui]))
 
@@ -38,6 +40,10 @@
       (js/setTimeout #(do (js/clearInterval timer)
                           (dice-rolled)) 1000))))
 
+(reframe/register-sub 
+  :bet-in-progress
+  (reaction (db-get :bet-in-progress)))
+
 (defn make-bet [choice]
   (db-put :bet choice)
   (db-put :bet-in-progress true)
@@ -68,15 +74,16 @@
 (defn player [] (let
                   [winner    (db-get :winner)
                    dice_then (db-get :previous_dice)
-                   dice_now  (db-get :dice)]
+                   dice_now  (db-get :dice)
+                   bet-in-progress (reframe/subscribe [:bet-in-progress])]
 
                   [:div.player
                     [bet]
                     [:div.winner (if (not (nil? winner)) (str "Winner: " winner))]
                     [dice { :number dice_now }]
-                    [:p { :class "bet-buttons" }
-                      [ui/button {:label "Higher" :disabled (db-get :bet-in-progress) :on-click #(make-bet "higher")}]
-                      [ui/button {:label "Lower"  :disabled (db-get :bet-in-progress) :on-click #(make-bet "lower")}]]]))
+                    [:p.bet-buttons
+                      [ui/button {:label "Higher" :disabled bet-in-progress :on-click #(make-bet "higher")}]
+                      [ui/button {:label "Lower"  :disabled bet-in-progress :on-click #(make-bet "lower")}]]]))
 
 (defn header []
   [:div.header 
