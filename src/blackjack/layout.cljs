@@ -1,5 +1,6 @@
 (ns blackjack.layout
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [blackjack.ui :as ui]))
 
 (defn header [] 
   (let
@@ -8,7 +9,8 @@
      [:div { :class "pull-left" } [:a { :href "/#" } "CASINO"]]
      [:div { :class "pull-right" }
       [:div (str "Score: " points)]
-      [:div#points-sparkline]]]))
+      [:div#points-sparkline
+       [ui/sparkline { :data (:points_history @blackjack.core/app-state) }]]]]))
 
 (defn debug-panel [] 
   (let [closed (r/atom false)]

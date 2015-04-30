@@ -14,12 +14,10 @@
 (defonce app-state (r/atom { :name "" :points 1000, :points_history [1000] }))
 
 ;; record points history
-;; update sparkline
 (add-watch app-state :points-watcher
   (fn [key reference old-state new-state] 
     (do 
-      (if (not (= (:points old-state) (:points new-state))) (swap! app-state assoc :points_history (conj (:points_history @app-state) (:points new-state))))
-      (js/sparkline (clj->js (:points_history @app-state))))))
+      (if (not (= (:points old-state) (:points new-state))) (swap! app-state assoc :points_history (conj (:points_history @app-state) (:points new-state)))))))
 
 ;; Routes
 
